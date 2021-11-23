@@ -39,3 +39,15 @@ name2 = re.sub("Name:", "", name1) # Removes search term wrappers #1
 name_result = re.sub("<*?br*?>", "", name2) # Removes search term wrappers #2
 print(name_result)
 
+print("or...")
+
+to_find = ["Name:", "Favorite Color:"]
+for string in ["Name:", "Favorite Color:"]:
+    string_start_idx = html.find(string)
+    text_start_idx = string_start_idx + len(string)
+
+    next_tag_idx = html[text_start_idx:].find("<")
+    text_end_idx = text__start_idx + next_tag_idx
+    raw_text = html[text_idx:string_end_idx]
+    clean_text = raw_text.strip(\r)
+    print(clean_text)
