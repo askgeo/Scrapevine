@@ -46,22 +46,7 @@ for img in images:
     print("\n", count, img["src"])
     count += 1
 
-print("And then...")
-
 # Use BS4 to pull links from a page
-base_url = "http://olympus.realpython.org"
-url_page = base_url + "/profiles"
-page = urlopen(url_page)
-html_bytes2 = page.read()
-html2 = html_bytes2.decode("utf-8")
-
-soup = BeautifulSoup(html2, "html.parser")
-#print(soup.get_text().replace("\n", " "))
-
-for link in soup.find_all("a"):
-    link_url = base_url + link["href"]
-    print(link_url)
-
 def make_soup(base_url, page):
     base = base_url
     page_url = base_url + page
@@ -71,10 +56,19 @@ def make_soup(base_url, page):
     soup = BeautifulSoup(html, "html.parser")
     return soup
 
-soup2 = make_soup("http://olympus.realpython.org", "/profiles")
-for link in soup2.find_all("a"):
-    link_url = base_url + link["href"]
-    print(link_url)
+base_url = "http://olympus.realpython.org"
+soup = make_soup(base_url, "/profiles")
+
+def return_links(soup, base_url):
+    for link in soup.find_all("a"):
+        link_url = base_url + link["href"]
+        print(link_url)
+
+return_links(soup, base_url)
+
+
+
+
 
 
 
