@@ -7,68 +7,99 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import re
 
+#-----------------------------------
+#-------------WITHOUT BEAUTIFUL SOUP
+#-----------------------------------
+
 # Pick a webpage and open, read bytes, and decode to characters
-url = "http://olympus.realpython.org/profiles/dionysus"
-page = urlopen(url)
-html_bytes = page.read()
-html = html_bytes.decode("utf-8")
+def get_html(url):
+    page = urlopen(url)
+    html_bytes = page.read()
+    html = html_bytes.decode("utf-8")
+    return html
 
-# Find favorite animal using regex
-animal_pattern = "animal:.*?<*?br*?>"
-animal_match_results = re.search(animal_pattern, html, re.IGNORECASE)
-animal1 = animal_match_results.group()
-#print(animal1)
-animal2 = re.sub("animal:", "", animal1) # Removes search term wrappers #1
-#print(animal2)
-animal_result = re.sub("<*?br*?>", "", animal2) # Removes search term wrappers #2
-animal_clean = animal_result.strip()
-#print(animal_clean)
+# Method 1: Find a pattern on a webpage and print the value after the pattern until the first tag
+def find_value(html, keyword):
+    pattern = keyword + ".*?<"
+    match_results = re.search(pattern, html, re.IGNORECASE)
+    i = match_results.group()
+    j = re.sub(keyword, "", i) # Removes search term wrappers #1
+    k = re.sub("<", "", j) # Removes search term wrappers #2
+    result = k.strip()
+    return result
 
-# Find name and favorite color using a loop
-to_find = ["Name:", "Favorite Color:"]
-for string in ["Name:", "Favorite Color:"]:
-    string_start_idx = html.find(string)
-    text_start_idx = string_start_idx + len(string)
+#html = get_html("http://olympus.realpython.org/profiles/dionysus")
+#print(html)
+#print(find_value(html, "Favorite animal:"))
 
-    next_tag_idx = html[text_start_idx:].find("<")
-    text_end_idx = text_start_idx + next_tag_idx
-    raw_text = html[text_start_idx:text_end_idx]
-    clean_text = raw_text.strip()
-    assert isinstance(clean_text, object)
-    #print(clean_text)
+# Method 2: Find a pattern on a webpage and print the value after the pattern until the first tag
+def find_values(keywords):
+    for string in keywords:
+        string_start_idx = html.find(string)
+        text_start_idx = string_start_idx + len(string)
 
-# Use BS4 to pull all image srcs from the page
-soup = BeautifulSoup(html, "html.parser")
-#print(soup.get_text().replace("\n", " "))
-images = soup.find_all("img")
-count = 0
-for img in images:
-    print("\n", count, img["src"])
-    count += 1
+        next_tag_idx = html[text_start_idx:].find("<")
+        text_end_idx = text_start_idx + next_tag_idx
+        raw_text = html[text_start_idx:text_end_idx]
+        clean_text = raw_text.strip()
+        return clean_text
 
-# Use BS4 to pull links from a page
+#to_find = ["Name:", "Favorite Color:", "animal:"]
+#print(find_values(to_find))
+
+#-----------------------------------
+#-------------WITH BEAUTIFUL SOUP---
+#-----------------------------------
+
+# Use BS4 to parse html and list images and links
 def make_soup(base_url, page):
-    base = base_url
     page_url = base_url + page
     page_stuff = urlopen(page_url)
     html_bytes = page_stuff.read()
     html = html_bytes.decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
+    print("\n", f"The url is: {base_url}{page}")
     return soup
 
+def list_links(soup, base_url):
+    links = soup.find_all("a")
+    if not links:
+        print("\n", "There are no links on this page.")
+    else:
+        print("\n", "The links are: ")
+        for link in links:
+            link_url = base_url + link["href"]
+            print(link_url)
+
+def list_imgs(soup):
+    images = soup.find_all("img")
+    if not images:
+        print("\n", "There are no images on this page.")
+    else:
+        print("\n", "The images are: ")
+        count = 0
+        for img in images:
+            print("\n", count, img["src"])
+            count += 1
+
+def list_value(soup, keywords):
+    pass
+
+# Enter base url and list of pages to parse, list links, list images, pull name
 base_url = "http://olympus.realpython.org"
-soup = make_soup(base_url, "/profiles")
+pages = ["/profiles", "/profiles/aphrodite", "/profiles/dionysus", "/profiles/poseidon"]
 
-def return_links(soup, base_url):
-    for link in soup.find_all("a"):
-        link_url = base_url + link["href"]
-        print(link_url)
+for page in pages:
+    soup = make_soup(base_url, page)
+    list_links(soup, base_url)
+    list_imgs(soup)
 
-return_links(soup, base_url)
+# Next step - make a function that takes in base_url and an index page and loops through each link, pulling out
+# the images and links in each one!
 
+# Then also make list_value work
 
+# Should I make a class?
 
-
-
-
+# Next step after that, start testing on Wikipedia
 
