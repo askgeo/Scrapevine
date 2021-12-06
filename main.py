@@ -35,15 +35,24 @@ def make_soup(base_url, subpage):
     soup = BeautifulSoup(html, "html.parser")
     return soup
 
+def seperate_coords(coords_val):
+    pass
+
 # Using the constant tags, scrape statistics for a Wikidata ID's page
 def scrape_data(soup):
     ele_val = soup.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
     coords_val = soup.find('div', class_=c.COORDS_CLASS).text
-    data_dict = {
+    stats_list = [coords_val, ele_val, ]
+    return stats_list
+
+def scrape_data_to_dict(soup):
+    ele_val = soup.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
+    coords_val = soup.find('div', class_=c.COORDS_CLASS).text
+    stats_dict = {
         c.COORDS_NAME: coords_val,
         c.ELE_NAME: ele_val,
     }
-    return data_dict
+    return stats_dict
 
 # -------------USER INPUT
 
@@ -55,9 +64,10 @@ pages = get_user_pages()
 for page in pages:
     try:
         soup = make_soup(c.BASE_URL, page)
-        data = scrape_data(soup)
-        print(data)
+        stats = scrape_data(soup)
+        print(stats)
     except:
         print('That doesn\'t seem to be a valid ID. Please try again later.')
 
 # Make a csv file and download it
+

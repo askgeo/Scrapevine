@@ -8,3 +8,5 @@ def iter_keys(any_dict):
     for i, x in enumerate(any_dict):
         print(i, x)
 
+def separate_coords():
+    pass
