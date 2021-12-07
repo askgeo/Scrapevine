@@ -2,11 +2,27 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import constants as c
 import configs as u
+from dataclasses import dataclass
+
+# -------------DATA CONTAINERS
+
+
+@dataclass
+class ScrapedData:
+    # Data container for each scraped page, defaulting to the 'Q182796' page
+    name: str = ' '
+    coords: str = ' '
+    elevation: int = 99999
+    inflow_name: str = ' '
+    outflow_name: str = ' '
+    data_id: str = ' '
+
 
 # -------------FUNCTIONS
 
-# Take user input until user hits ENTER
+
 def get_user_pages():
+    # Take user input until user hits ENTER
     i = 0
     user_pages = []
     input_active = True
@@ -28,46 +44,75 @@ def get_user_pages():
     print(f'\nNow scraping: {user_pages}.\n')
     return user_pages
 
-# Make a Beautiful Soup object from the base url and page from user defined ID
+
 def make_soup(base_url, subpage):
+    # Make a Beautiful Soup tag object from the base url and page from user defined ID
     page_url = base_url + subpage
     html = urlopen(page_url).read().decode("utf-8")
-    soup = BeautifulSoup(html, "html.parser")
-    return soup
+    soup_object = BeautifulSoup(html, "html.parser")
+    return soup_object
 
-def seperate_coords(coords_val):
+
+def separate_coords():
+    # Comment
     pass
 
-# Using the constant tags, scrape statistics for a Wikidata ID's page
-def scrape_data(soup):
-    ele_val = soup.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
-    coords_val = soup.find('div', class_=c.COORDS_CLASS).text
+
+def scrape_data(soup_object):
+    # Using the constant tags, scrape statistics for a Wikidata ID's page
+    ele_val = soup_object.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
+    coords_val = soup_object.find('div', class_=c.COORDS_CLASS).text
     stats_list = [coords_val, ele_val, ]
     return stats_list
 
-def scrape_data_to_dict(soup):
-    ele_val = soup.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
-    coords_val = soup.find('div', class_=c.COORDS_CLASS).text
+
+def scrape_data_to_class(soup_object, subpage):
+    # Using the constant tags, scrape statistics for a Wikidata ID's page
+    ele_val = soup_object.find('div', id=c.ELE_ID)\
+        .find('div', class_=c.ELE_CLASS)\
+        .text
+    coords_val = soup_object.find('div', class_=c.COORDS_CLASS)\
+        .text.replace(',', '')
+    stats_instance = ScrapedData(
+        data_id=subpage,
+        coords=coords_val,
+        elevation=ele_val,
+    )
+    return stats_instance
+
+
+def scrape_data_to_dict(soup_object):
+    # Using the constant tags, scrape statistics for a Wikidata ID's page
+    ele_val = soup_object.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
+    coords_val = soup_object.find('div', class_=c.COORDS_CLASS).text
     stats_dict = {
-        c.COORDS_NAME: coords_val,
-        c.ELE_NAME: ele_val,
+        'Coordinates:': coords_val,
+        'Elevation above sea level:': ele_val,
     }
     return stats_dict
+
 
 # -------------USER INPUT
 
 pages = get_user_pages()
 
+
 # -------------PROCESS
 
-# Make soup object, get the info as a dictionary, then print it
+# Make soup object, get the info as a dataclass instance, then print it
+# Need to refactor the following to functions, configs, and constants
+headers = 'data_id;name;coordinates;elevation'
+metadata = ()
+print(headers)
 for page in pages:
     try:
-        soup = make_soup(c.BASE_URL, page)
-        stats = scrape_data(soup)
-        print(stats)
+        soup = make_soup(base_url=c.BASE_URL, subpage=page)
+        ele_val = soup.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
+        coords_val = soup.find('div', class_=c.COORDS_CLASS).text.replace(',', '')
+        name_val = 'name_placeholder'
+        stats = ScrapedData(name=name_val, coords=coords_val, elevation=ele_val, data_id=page)
+        print(f'''{stats.data_id};{stats.name};{stats.coords};{stats.elevation}''')
     except:
         print('That doesn\'t seem to be a valid ID. Please try again later.')
 
 # Make a csv file and download it
-
