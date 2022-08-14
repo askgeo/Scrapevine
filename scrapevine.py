@@ -1,4 +1,5 @@
 # scrapevine, a First Webscraper Project
+# Webscraper tutorial code, refactored into a program by Abigail Knapp
 # Project basis and code snippets from realpython tutorial
 # at https://realpython.com/python-web-scraping-practical-introduction
 # Abigail Knapp 11/2021
@@ -54,9 +55,7 @@ def find_values(keywords):
 # Use BS4 to parse html and list images and links
 def make_soup(base_url, page):
     page_url = base_url + page
-    page_stuff = urlopen(page_url)
-    html_bytes = page_stuff.read()
-    html = html_bytes.decode("utf-8")
+    html = urlopen(page_url).read().decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
     print("\n", f"The url is: {base_url}{page}")
     return soup

@@ -101,18 +101,27 @@ pages = get_user_pages()
 
 # Make soup object, get the info as a dataclass instance, then print it
 # Need to refactor the following to functions, configs, and constants
-headers = 'data_id;name;coordinates;elevation'
-metadata = ()
-print(headers)
+data_list = []
+
 for page in pages:
     try:
         soup = make_soup(base_url=c.BASE_URL, subpage=page)
         ele_val = soup.find('div', id=c.ELE_ID).find('div', class_=c.ELE_CLASS).text
         coords_val = soup.find('div', class_=c.COORDS_CLASS).text.replace(',', '')
         name_val = 'name_placeholder'
+        #put the scraped data into a dataclass and then into the list
         stats = ScrapedData(name=name_val, coords=coords_val, elevation=ele_val, data_id=page)
-        print(f'''{stats.data_id};{stats.name};{stats.coords};{stats.elevation}''')
+        data_list.append(stats)
     except:
         print('That doesn\'t seem to be a valid ID. Please try again later.')
+
+#print(f"\nSuccess! For example, the lake named {data_list[0].name} is at {data_list[0].coords} and "
+#      f"\nis approximately {data_list[0].elevation}s above sea level. \n")
+
+headers = 'data_id;name;coordinates;elevation'
+print(headers)
+for thing in data_list:
+    line = f"{thing.data_id};{thing.name};{thing.coords};{thing.elevation}"
+    ######need to append these lines to a list and then save as a text document
 
 # Make a csv file and download it
